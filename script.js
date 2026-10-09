@@ -1,4 +1,6 @@
 const API_URL = "https://mental-health-score-6-vjpl.onrender.com";
+const PREDICT_URL = API_URL + "/predict"; // <-- the fix: include the route name
+
 // The model's score scale. The common student-habits dataset uses 1–10, higher = better.
 // Change these two if your training data differs.
 const SCORE_MAX = 10;
@@ -38,16 +40,28 @@ $("form").addEventListener("submit", async e=>{
   show("loading");
   const t0 = Date.now();
   try{
-    const res = await fetch(API_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(buildPayload())});
+    const res = await fetch(PREDICT_URL, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(buildPayload())
+    });
     const data = await res.json().catch(()=>({}));
     if(!res.ok){
       const d = data.detail;
-      throw new Error(Array.isArray(d) ? d.map(x=>`${x.loc.slice(-1)[0]}: ${x.msg}`).join("; ") : (d || "Server returned "+res.status));
+      throw new Error(
+        Array.isArray(d)
+          ? d.map(x=>`${x.loc.slice(-1)[0]}: ${x.msg}`).join("; ")
+          : (d || "Server returned "+res.status)
+      );
     }
     await new Promise(r=>setTimeout(r, Math.max(0, 700-(Date.now()-t0)))); // let the loader be seen
     showResult(data.predicted_mental_health_score);
   }catch(err){
-    fail(err.message==="Failed to fetch" ? "Can't reach the API. Make sure uvicorn is running on port 8000." : err.message);
+    fail(
+      err.message==="Failed to fetch"
+        ? "Can't reach the API. It may be waking up (free tier takes ~60s) — try again shortly."
+        : err.message
+    );
   }finally{
     btn.disabled = false; btn.textContent = "Predict score";
   }
