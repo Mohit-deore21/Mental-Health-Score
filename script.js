@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:8000/predict";
+const API_URL = "https://mental-health-score-6-vjpl.onrender.com";
 // The model's score scale. The common student-habits dataset uses 1–10, higher = better.
 // Change these two if your training data differs.
 const SCORE_MAX = 10;
